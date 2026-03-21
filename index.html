@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud-Nexus | Sistema de Logs</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 400px; }
+        h1 { color: #1a73e8; font-size: 24px; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #1557b0; }
+        ul { list-style: none; padding: 0; margin-top: 20px; max-height: 150px; overflow-y: auto; }
+        li { background: #e8f0fe; margin-bottom: 5px; padding: 8px; border-radius: 4px; font-size: 14px; border-left: 4px solid #1a73e8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cloud-Nexus Log System</h1>
+        <p style="text-align: center; color: #666;">PaaS Deployment Practice</p>
+        <form id="logForm">
+            <input type="text" id="logInput" placeholder="Escribe un evento para el log..." required>
+            <button type="submit">Registrar en la Nube</button>
+        </form>
+        <ul id="logList"></ul>
+    </div>
+
+    <script>
+        const form = document.getElementById('logForm');
+        const list = document.getElementById('logList');
+
+        form.onsubmit = (e) => {
+            e.preventDefault();
+            const input = document.getElementById('logInput');
+            const li = document.createElement('li');
+            li.textContent = `[${new Date().toLocaleTimeString()}] - ${input.value}`;
+            list.prepend(li);
+            input.value = '';
+        };
+    </script>
+</body>
+</html>
