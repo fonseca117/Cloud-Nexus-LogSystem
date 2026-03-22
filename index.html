@@ -6,13 +6,9 @@
     <title>Cloud-Nexus | Jose Martinez</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <style>
-        [x-cloak] { display: none !important; }
-    </style>
+    <style>[x-cloak] { display: none !important; }</style>
 </head>
-<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 font-sans">
 
     <main x-data="{ 
             logs: [],
@@ -23,13 +19,16 @@
                 if (!this.inputValue.trim()) return;
                 this.isLoading = true;
                 
-                // DIRECCIÓN SEGÚN TU ÚLTIMA CAPTURA DE NGROK
+                // TU URL ACTUAL DE NGROK
                 const url = 'https://unmonumental-touchily-meghann.ngrok-free.dev/guardar.php';
 
                 try {
                     const response = await fetch(url, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'ngrok-skip-browser-warning': '69420' // Salta la advertencia de Ngrok
+                        },
                         body: JSON.stringify({ mensaje: this.inputValue })
                     });
 
@@ -55,9 +54,9 @@
                    class="w-full p-4 bg-slate-50 border rounded-2xl mb-4 outline-none focus:border-blue-500">
             
             <button @click="addLog" :disabled="isLoading || !inputValue.trim()" 
-                    class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 disabled:bg-slate-300 transition-all flex justify-center items-center gap-2">
+                    class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition-all flex justify-center items-center gap-2">
                 <span x-show="!isLoading">Registrar Evento</span>
-                <span x-show="isLoading">Sincronizando...</span>
+                <span x-show="isLoading text-white">Sincronizando...</span>
             </button>
         </section>
 
@@ -72,7 +71,5 @@
             </div>
         </section>
     </main>
-
-    <script>lucide.createIcons();</script>
 </body>
 </html>
