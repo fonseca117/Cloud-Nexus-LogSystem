@@ -54,47 +54,47 @@
                 if (!this.inputValue.trim()) return;
                 this.isLoading = true;
                 
-                const textoAEnviar = this.inputValue;
+                const textoEvento = this.inputValue;
                 const now = new Date();
                 const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
-                              now.getMinutes().toString().padStart(2, '0') + ':' + 
-                              now.getSeconds().toString().padStart(2, '0');
+                                now.getMinutes().toString().padStart(2, '0') + ':' + 
+                                now.getSeconds().toString().padStart(2, '0');
 
                 try {
-                    // CONEXIÓN REAL AL SERVIDOR UBUNTU (IaaS)
+                    // LLAMADA REAL AL SERVIDOR UBUNTU (IaaS)
                     const response = await fetch('http://192.168.0.108/guardar.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ mensaje: textoAEnviar })
+                        body: JSON.stringify({ mensaje: textoEvento })
                     });
 
                     if (response.ok) {
-                        // Si el servidor responde bien, agregamos el log como éxito
+                        // Si se guardó en el servidor, lo agregamos a la lista visual
                         this.logs.unshift({
                             id: Date.now(),
-                            text: textoAEnviar,
+                            text: textoEvento,
                             type: 'success',
                             time: timeStr
                         });
                         this.inputValue = '';
                     } else {
-                        throw new Error('Servidor no disponible');
+                        throw new Error('Error en la respuesta del servidor');
                     }
                 } catch (error) {
-                    console.error('Error de red:', error);
-                    alert('Error: No se pudo conectar con el servidor local (192.168.0.108)');
+                    console.error('Error de conexión:', error);
+                    alert('Error: No se pudo conectar con el servidor local en la IP 192.168.0.108. Asegúrate de que el servidor esté encendido.');
                     
-                    // Registramos el fallo visualmente
+                    // Lo agregamos como advertencia si falla
                     this.logs.unshift({
                         id: Date.now(),
-                        text: 'FALLO DE SINCRONIZACIÓN: ' + textoAEnviar,
+                        text: 'ERROR DE SINCRONIZACIÓN: ' + textoEvento,
                         type: 'info',
                         time: timeStr
                     });
                 } finally {
                     this.isLoading = false;
-                    // Forzar actualización de iconos Lucide
-                    setTimeout(() => lucide.createIcons(), 10);
+                    // Forzar actualización de iconos Lucide para los nuevos elementos
+                    setTimeout(() => lucide.createIcons(), 50);
                 }
             }
         }"
@@ -153,7 +153,7 @@
                     <template x-if="isLoading">
                         <div class="flex items-center gap-2">
                             <i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>
-                            <span>Conectando con IP...</span>
+                            <span>Sincronizando con Ubuntu...</span>
                         </div>
                     </template>
                 </button>
@@ -164,7 +164,7 @@
             <div class="flex items-center justify-between mb-5">
                 <h2 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
                     <span class="flex h-2 w-2 rounded-full bg-blue-500"></span>
-                    Terminal de Salida
+                    Terminal de Salida (logs.txt)
                 </h2>
                 <button 
                     @click="logs = []"
@@ -217,7 +217,7 @@
         // Inicializar iconos
         lucide.createIcons();
         
-        // Reinicializar iconos cuando Alpine actualice el DOM (para los nuevos logs)
+        // Reinicializar iconos cuando Alpine actualice el DOM
         document.addEventListener('alpine:initialized', () => {
             Alpine.effect(() => {
                 setTimeout(() => lucide.createIcons(), 10);
