@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cloud-Nexus | Enterprise Log System</title>
-    <!-- Tailwind CSS para diseño profesional -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js para lógica y animaciones simples -->
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Animate.css para transiciones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     
     <style>
@@ -40,13 +36,11 @@
 </head>
 <body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 font-sans antialiased text-slate-800">
 
-    <!-- Fondo decorativo -->
     <div class="fixed inset-0 overflow-hidden -z-10">
         <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-blue-100/50 blur-[120px]"></div>
         <div class="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] rounded-full bg-indigo-100/50 blur-[120px]"></div>
     </div>
 
-    <!-- Aplicación Principal -->
     <main 
         x-data="{ 
             logs: [
@@ -55,31 +49,58 @@
             ],
             inputValue: '',
             isLoading: false,
-            addLog() {
+            
+            async addLog() {
                 if (!this.inputValue.trim()) return;
                 this.isLoading = true;
                 
-                setTimeout(() => {
-                    const now = new Date();
-                    const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
-                                    now.getMinutes().toString().padStart(2, '0') + ':' + 
-                                    now.getSeconds().toString().padStart(2, '0');
+                const textoAEnviar = this.inputValue;
+                const now = new Date();
+                const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
+                              now.getMinutes().toString().padStart(2, '0') + ':' + 
+                              now.getSeconds().toString().padStart(2, '0');
+
+                try {
+                    // CONEXIÓN REAL AL SERVIDOR UBUNTU (IaaS)
+                    const response = await fetch('http://192.168.0.108/guardar.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ mensaje: textoAEnviar })
+                    });
+
+                    if (response.ok) {
+                        // Si el servidor responde bien, agregamos el log como éxito
+                        this.logs.unshift({
+                            id: Date.now(),
+                            text: textoAEnviar,
+                            type: 'success',
+                            time: timeStr
+                        });
+                        this.inputValue = '';
+                    } else {
+                        throw new Error('Servidor no disponible');
+                    }
+                } catch (error) {
+                    console.error('Error de red:', error);
+                    alert('Error: No se pudo conectar con el servidor local (192.168.0.108)');
                     
+                    // Registramos el fallo visualmente
                     this.logs.unshift({
                         id: Date.now(),
-                        text: this.inputValue,
-                        type: 'user',
+                        text: 'FALLO DE SINCRONIZACIÓN: ' + textoAEnviar,
+                        type: 'info',
                         time: timeStr
                     });
-                    this.inputValue = '';
+                } finally {
                     this.isLoading = false;
-                }, 600);
+                    // Forzar actualización de iconos Lucide
+                    setTimeout(() => lucide.createIcons(), 10);
+                }
             }
         }"
         class="relative w-full max-w-md bg-white border border-slate-200 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.06)] overflow-hidden animate__animated animate__fadeInUp"
     >
         
-        <!-- Header -->
         <header class="bg-slate-900 p-8 text-white relative overflow-hidden">
             <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                 <i data-lucide="activity" class="w-32 h-32"></i>
@@ -100,7 +121,6 @@
             </div>
         </header>
 
-        <!-- Formulario -->
         <section class="p-8 pb-4">
             <div class="space-y-4">
                 <div>
@@ -131,13 +151,15 @@
                         </div>
                     </template>
                     <template x-if="isLoading">
-                        <i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>
+                            <span>Conectando con IP...</span>
+                        </div>
                     </template>
                 </button>
             </div>
         </section>
 
-        <!-- Lista de Logs -->
         <section class="px-8 pb-8 pt-4">
             <div class="flex items-center justify-between mb-5">
                 <h2 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
@@ -182,7 +204,6 @@
             </div>
         </section>
 
-        <!-- Footer -->
         <footer class="bg-slate-50/80 px-8 py-4 border-t border-slate-100 flex justify-between items-center">
             <div class="flex items-center gap-2">
                 <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse-soft shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
@@ -199,7 +220,6 @@
         // Reinicializar iconos cuando Alpine actualice el DOM (para los nuevos logs)
         document.addEventListener('alpine:initialized', () => {
             Alpine.effect(() => {
-                // Esto se ejecuta cada vez que el estado cambia
                 setTimeout(() => lucide.createIcons(), 10);
             });
         });
