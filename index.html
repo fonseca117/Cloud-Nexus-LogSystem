@@ -8,200 +8,85 @@
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    
     <style>
         [x-cloak] { display: none !important; }
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #e2e8f0;
-            border-radius: 10px;
-        }
-        @keyframes pulse-soft {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .animate-pulse-soft {
-            animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .animate-pulse-soft { animation: pulse-soft 2s infinite; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 font-sans antialiased text-slate-800">
 
     <div class="fixed inset-0 overflow-hidden -z-10">
         <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-blue-100/50 blur-[120px]"></div>
-        <div class="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] rounded-full bg-indigo-100/50 blur-[120px]"></div>
     </div>
 
-    <main 
-        x-data="{ 
+    <main x-data="{ 
             logs: [],
             inputValue: '',
             isLoading: false,
+            // IMPORTANTE: Si usas Vercel, esta IP debe ser tu IP PÚBLICA o usar un Túnel
+            serverUrl: 'http://192.168.0.108/guardar.php', 
             
             async addLog() {
                 if (!this.inputValue.trim()) return;
                 this.isLoading = true;
-                
-                const textoEvento = this.inputValue;
-                const now = new Date();
-                const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
-                                now.getMinutes().toString().padStart(2, '0') + ':' + 
-                                now.getSeconds().toString().padStart(2, '0');
+                const texto = this.inputValue;
+                const timeStr = new Date().toLocaleTimeString();
 
                 try {
-                    // LLAMADA AL SERVIDOR UBUNTU (IP LOCAL)
-                    const response = await fetch('http://192.168.0.108/guardar.php', {
+                    const response = await fetch(this.serverUrl, {
                         method: 'POST',
+                        mode: 'cors',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ mensaje: textoEvento })
+                        body: JSON.stringify({ mensaje: texto })
                     });
 
                     if (response.ok) {
-                        this.logs.unshift({
-                            id: Date.now(),
-                            text: textoEvento,
-                            type: 'success',
-                            time: timeStr
-                        });
+                        this.logs.unshift({ id: Date.now(), text: texto, type: 'success', time: timeStr });
                         this.inputValue = '';
-                    } else {
-                        throw new Error('Error en el servidor');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Error de conexión con 192.168.0.108. Verifica que el servidor Ubuntu esté activo y en la misma red.');
-                    
-                    this.logs.unshift({
-                        id: Date.now(),
-                        text: 'FALLO DE CONEXIÓN: ' + textoEvento,
-                        type: 'info',
-                        time: timeStr
-                    });
+                    } else { throw new Error(); }
+                } catch (err) {
+                    alert('Error: La web en GitHub/Vercel no puede ver tu IP local 192.168.0.108. Lee las instrucciones de la terminal.');
+                    this.logs.unshift({ id: Date.now(), text: 'FALLO DE RED: ' + texto, type: 'info', time: timeStr });
                 } finally {
                     this.isLoading = false;
                     setTimeout(() => lucide.createIcons(), 50);
                 }
             }
         }"
-        class="relative w-full max-w-md bg-white border border-slate-200 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.06)] overflow-hidden animate__animated animate__fadeInUp"
+        class="relative w-full max-w-md bg-white border border-slate-200 rounded-[2rem] shadow-xl overflow-hidden"
     >
-        
-        <header class="bg-slate-900 p-8 text-white relative overflow-hidden">
-            <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                <i data-lucide="activity" class="w-32 h-32"></i>
-            </div>
-            
-            <div class="relative z-10">
-                <div class="flex items-center gap-2 mb-3">
-                    <div class="p-2 bg-blue-500 rounded-xl shadow-lg shadow-blue-500/30">
-                        <i data-lucide="database" class="w-5 h-5 text-white"></i>
-                    </div>
-                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-400">Cloud Infrastructure</span>
-                </div>
-                <h1 class="text-3xl font-black tracking-tight">Cloud-Nexus</h1>
-                <div class="flex items-center gap-2 mt-2 text-slate-400 text-xs">
-                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
-                    <span>Monitor de Eventos Activo</span>
-                </div>
-            </div>
+        <header class="bg-slate-900 p-8 text-white">
+            <h1 class="text-3xl font-black italic">Cloud-Nexus</h1>
+            <p class="text-blue-400 text-xs mt-2 uppercase tracking-widest">Infraestructura IaaS conectada</p>
         </header>
 
-        <section class="p-8 pb-4">
-            <div class="space-y-4">
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-2 block">Entrada de Comandos</label>
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
-                            <i data-lucide="terminal" class="w-4 h-4"></i>
-                        </div>
-                        <input 
-                            type="text" 
-                            x-model="inputValue"
-                            @keydown.enter="addLog"
-                            placeholder="Ej: Reiniciar nodo alpha..." 
-                            class="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-sm font-medium"
-                        >
-                    </div>
-                </div>
-
-                <button 
-                    @click="addLog"
-                    :disabled="isLoading || !inputValue.trim()"
-                    class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.97] transition-all flex items-center justify-center gap-2 group"
-                >
-                    <template x-if="!isLoading">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="plus" class="w-5 h-5 group-hover:rotate-90 transition-transform"></i>
-                            <span>Registrar Evento</span>
-                        </div>
-                    </template>
-                    <template x-if="isLoading">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>
-                            <span>Sincronizando con Ubuntu...</span>
-                        </div>
-                    </template>
-                </button>
-            </div>
+        <section class="p-8">
+            <input type="text" x-model="inputValue" @keydown.enter="addLog" placeholder="Escribe un log para Ubuntu..." 
+                class="w-full p-4 bg-slate-50 border rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-blue-500">
+            
+            <button @click="addLog" :disabled="isLoading || !inputValue.trim()"
+                class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition-all">
+                <span x-show="!isLoading">Registrar en Servidor</span>
+                <span x-show="isLoading">Sincronizando...</span>
+            </button>
         </section>
 
-        <section class="px-8 pb-8 pt-4">
-            <div class="flex items-center justify-between mb-5">
-                <h2 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                    <span class="flex h-2 w-2 rounded-full bg-blue-500"></span>
-                    Terminal de Salida (logs.txt)
-                </h2>
-                <button @click="logs = []" class="text-slate-300 hover:text-red-500 transition-colors p-1">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                </button>
-            </div>
-
-            <div class="space-y-3 max-h-[280px] overflow-y-auto pr-2 custom-scrollbar">
-                <template x-if="logs.length === 0">
-                    <div class="text-center py-12 border-2 border-dashed border-slate-100 rounded-[2rem]">
-                        <p class="text-xs text-slate-400 font-medium italic">Esperando nuevas entradas...</p>
-                    </div>
-                </template>
-
+        <section class="px-8 pb-8">
+            <h2 class="text-[10px] font-bold text-slate-500 uppercase mb-4">Logs Recientes</h2>
+            <div class="space-y-3 max-h-40 overflow-y-auto custom-scrollbar">
                 <template x-for="log in logs" :key="log.id">
-                    <div class="animate__animated animate__fadeInLeft animate__faster group">
-                        <div class="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-blue-200 hover:bg-white hover:shadow-lg transition-all">
-                            <div class="mt-1.5 shrink-0">
-                                <div :class="log.type === 'success' ? 'bg-emerald-500 ring-4 ring-emerald-500/10' : 'bg-blue-500 ring-4 ring-blue-500/10'" class="h-2 w-2 rounded-full"></div>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between mb-1">
-                                    <span class="text-[10px] font-mono text-slate-400" x-text="log.time"></span>
-                                    <i data-lucide="chevron-right" class="w-3 h-3 text-slate-200 group-hover:text-blue-400 transition-colors"></i>
-                                </div>
-                                <p class="text-sm text-slate-700 font-medium leading-tight break-words" x-text="log.text"></p>
-                            </div>
-                        </div>
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 flex justify-between">
+                        <span class="text-sm font-medium" x-text="log.text"></span>
+                        <span class="text-[10px] text-slate-400" x-text="log.time"></span>
                     </div>
                 </template>
             </div>
         </section>
-
-        <footer class="bg-slate-50/80 px-8 py-4 border-t border-slate-100 flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse-soft shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Nodo Central: Activo</span>
-            </div>
-            <span class="text-[9px] font-bold text-slate-300 uppercase">v2.4.0-STABLE</span>
-        </footer>
     </main>
 
-    <script>
-        lucide.createIcons();
-    </script>
+    <script>lucide.createIcons();</script>
 </body>
 </html>
