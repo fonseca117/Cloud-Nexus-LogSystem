@@ -19,31 +19,35 @@
                 if (!this.inputValue.trim()) return;
                 this.isLoading = true;
                 
-                // URL DE TU TUNEL NGROK ACTUAL
+                // --- CAMBIA ESTA URL SI TU NGROK SE REINICIA ---
                 const url = 'https://unmonumental-touchily-meghann.ngrok-free.dev/guardar.php';
 
                 try {
                     const response = await fetch(url, {
                         method: 'POST',
+                        mode: 'cors', // Asegura modo CORS
                         headers: { 
                             'Content-Type': 'application/json',
-                            'ngrok-skip-browser-warning': 'true' // Salta la advertencia de Ngrok para Vercel
+                            'ngrok-skip-browser-warning': '69420' // VALOR CRÍTICO: Salta la pantalla de Ngrok
                         },
                         body: JSON.stringify({ mensaje: this.inputValue })
                     });
 
                     if (response.ok) {
-                        this.logs.unshift({ 
-                            id: Date.now(), 
-                            text: this.inputValue, 
-                            time: new Date().toLocaleTimeString() 
-                        });
-                        this.inputValue = '';
+                        const result = await response.json();
+                        if(result.status === 'success') {
+                            this.logs.unshift({ 
+                                id: Date.now(), 
+                                text: this.inputValue, 
+                                time: new Date().toLocaleTimeString() 
+                            });
+                            this.inputValue = '';
+                        }
                     } else { 
-                        throw new Error('Respuesta no exitosa'); 
+                        throw new Error('Servidor no respondió OK'); 
                     }
                 } catch (e) {
-                    alert('Error: No se pudo conectar con el servidor Ubuntu');
+                    alert('Error de conexión: Revisa que Ngrok esté encendido y la URL sea correcta');
                     console.error(e);
                 } finally {
                     this.isLoading = false;
@@ -63,7 +67,7 @@
             <button @click="addLog" :disabled="isLoading || !inputValue.trim()" 
                     class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition-all flex justify-center items-center gap-2">
                 <span x-show="!isLoading">Registrar Evento</span>
-                <span x-show="isLoading" class="flex items-center gap-2">
+                <span x-show="isLoading" class="flex items-center gap-2" x-cloak>
                     <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                     Sincronizando...
                 </span>
