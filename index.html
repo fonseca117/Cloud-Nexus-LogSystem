@@ -25,7 +25,7 @@
                 if (!this.inputValue.trim()) return;
                 this.isLoading = true;
                 
-                // ESTA ES TU URL ACTUAL SEGÚN TU CAPTURA DE PANTALLA
+                // TU LINK DE NGROK YA CONFIGURADO
                 const url = 'https://unmonumental-touchily-meghann.ngrok-free.dev/guardar.php';
 
                 const texto = this.inputValue;
@@ -44,8 +44,8 @@
                         this.inputValue = '';
                     } else { throw new Error(); }
                 } catch (e) {
-                    alert('Error: No se pudo conectar con el servidor Ubuntu');
-                    this.logs.unshift({ id: Date.now(), text: 'FALLO: ' + texto, type: 'info', time: timeStr });
+                    alert('Error: No se pudo conectar con el servidor Ubuntu. Revisa que Ngrok siga abierto.');
+                    this.logs.unshift({ id: Date.now(), text: 'ERROR: ' + texto, type: 'info', time: timeStr });
                 } finally {
                     this.isLoading = false;
                     setTimeout(() => lucide.createIcons(), 50);
@@ -54,13 +54,13 @@
         }" class="w-full max-w-md bg-white border border-slate-200 rounded-[2rem] shadow-xl overflow-hidden">
         
         <header class="bg-slate-900 p-8 text-white">
-            <h1 class="text-3xl font-black">Cloud-Nexus</h1>
-            <p class="text-xs text-slate-400">Infraestructura IaaS - Jose Martinez</p>
+            <h1 class="text-3xl font-black italic">Cloud-Nexus</h1>
+            <p class="text-xs text-slate-400">Infraestructura IaaS Activa</p>
         </header>
 
         <section class="p-8 pb-4">
-            <input type="text" x-model="inputValue" @keydown.enter="addLog" placeholder="Ej: Registro de sistema..." 
-                   class="w-full p-4 bg-slate-50 border rounded-2xl mb-4 outline-none focus:border-blue-500 font-medium">
+            <input type="text" x-model="inputValue" @keydown.enter="addLog" placeholder="Escribir registro..." 
+                   class="w-full p-4 bg-slate-50 border rounded-2xl mb-4 outline-none focus:border-blue-500 font-medium transition-all">
             
             <button @click="addLog" :disabled="isLoading || !inputValue.trim()" 
                     class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 disabled:bg-slate-300 transition-all flex justify-center items-center gap-2">
@@ -72,10 +72,10 @@
         </section>
 
         <section class="px-8 pb-8 pt-4">
-            <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Terminal de Salida (logs.txt)</h2>
+            <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 italic">Historial del Servidor</h2>
             <div class="space-y-3 max-h-[250px] overflow-y-auto custom-scrollbar">
                 <template x-for="log in logs" :key="log.id">
-                    <div class="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                    <div class="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 animate__animated animate__fadeInDown">
                         <div class="mt-1.5 h-2 w-2 rounded-full bg-blue-500"></div>
                         <div class="flex-1">
                             <span class="text-[10px] text-slate-400 font-mono" x-text="log.time"></span>
