@@ -12,33 +12,28 @@
         [x-cloak] { display: none !important; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .animate-pulse-soft { animation: pulse-soft 2s infinite; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 font-sans antialiased text-slate-800">
-
-    <div class="fixed inset-0 overflow-hidden -z-10">
-        <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-blue-100/50 blur-[120px]"></div>
-    </div>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 font-sans text-slate-800">
 
     <main x-data="{ 
             logs: [],
             inputValue: '',
             isLoading: false,
-            // IMPORTANTE: Si usas Vercel, esta IP debe ser tu IP PÚBLICA o usar un Túnel
-            serverUrl: 'http://192.168.0.108/guardar.php', 
             
             async addLog() {
                 if (!this.inputValue.trim()) return;
                 this.isLoading = true;
+                
+                // --- TU URL DE NGROK ACTUALIZADA ---
+                const url = 'https://unmonumental-touchily-meghann.ngrok-free.dev/guardar.php';
+
                 const texto = this.inputValue;
                 const timeStr = new Date().toLocaleTimeString();
 
                 try {
-                    const response = await fetch(this.serverUrl, {
+                    const response = await fetch(url, {
                         method: 'POST',
-                        mode: 'cors',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ mensaje: texto })
                     });
@@ -47,40 +42,44 @@
                         this.logs.unshift({ id: Date.now(), text: texto, type: 'success', time: timeStr });
                         this.inputValue = '';
                     } else { throw new Error(); }
-                } catch (err) {
-                    alert('Error: La web en GitHub/Vercel no puede ver tu IP local 192.168.0.108. Lee las instrucciones de la terminal.');
-                    this.logs.unshift({ id: Date.now(), text: 'FALLO DE RED: ' + texto, type: 'info', time: timeStr });
+                } catch (e) {
+                    alert('Error: No se pudo conectar con el servidor Ubuntu');
+                    this.logs.unshift({ id: Date.now(), text: 'FALLO: ' + texto, type: 'info', time: timeStr });
                 } finally {
                     this.isLoading = false;
                     setTimeout(() => lucide.createIcons(), 50);
                 }
             }
-        }"
-        class="relative w-full max-w-md bg-white border border-slate-200 rounded-[2rem] shadow-xl overflow-hidden"
-    >
+        }" class="w-full max-w-md bg-white border border-slate-200 rounded-[2rem] shadow-xl overflow-hidden">
+        
         <header class="bg-slate-900 p-8 text-white">
-            <h1 class="text-3xl font-black italic">Cloud-Nexus</h1>
-            <p class="text-blue-400 text-xs mt-2 uppercase tracking-widest">Infraestructura IaaS conectada</p>
+            <h1 class="text-3xl font-black">Cloud-Nexus</h1>
+            <p class="text-xs text-slate-400">Infraestructura IaaS - Jose Martinez</p>
         </header>
 
-        <section class="p-8">
-            <input type="text" x-model="inputValue" @keydown.enter="addLog" placeholder="Escribe un log para Ubuntu..." 
-                class="w-full p-4 bg-slate-50 border rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-blue-500">
+        <section class="p-8 pb-4">
+            <input type="text" x-model="inputValue" @keydown.enter="addLog" placeholder="Ej: Iniciar respaldo..." 
+                   class="w-full p-4 bg-slate-50 border rounded-2xl mb-4 outline-none focus:border-blue-500 font-medium">
             
-            <button @click="addLog" :disabled="isLoading || !inputValue.trim()"
-                class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition-all">
-                <span x-show="!isLoading">Registrar en Servidor</span>
-                <span x-show="isLoading">Sincronizando...</span>
+            <button @click="addLog" :disabled="isLoading || !inputValue.trim()" 
+                    class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 disabled:bg-slate-300 transition-all flex justify-center items-center gap-2">
+                <span x-show="!isLoading">Registrar Evento</span>
+                <span x-show="isLoading" class="flex items-center gap-2">
+                    <i data-lucide="loader-2" class="animate-spin w-5 h-5"></i> Sincronizando...
+                </span>
             </button>
         </section>
 
-        <section class="px-8 pb-8">
-            <h2 class="text-[10px] font-bold text-slate-500 uppercase mb-4">Logs Recientes</h2>
-            <div class="space-y-3 max-h-40 overflow-y-auto custom-scrollbar">
+        <section class="px-8 pb-8 pt-4">
+            <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Terminal de Salida</h2>
+            <div class="space-y-3 max-h-[250px] overflow-y-auto custom-scrollbar">
                 <template x-for="log in logs" :key="log.id">
-                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 flex justify-between">
-                        <span class="text-sm font-medium" x-text="log.text"></span>
-                        <span class="text-[10px] text-slate-400" x-text="log.time"></span>
+                    <div class="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                        <div class="mt-1.5 h-2 w-2 rounded-full bg-blue-500"></div>
+                        <div class="flex-1">
+                            <span class="text-[10px] text-slate-400 font-mono" x-text="log.time"></span>
+                            <p class="text-sm font-semibold text-slate-700" x-text="log.text"></p>
+                        </div>
                     </div>
                 </template>
             </div>
