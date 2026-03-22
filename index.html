@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud-Nexus | Enterprise Log System</title>
+    <title>Cloud-Nexus | Jose Martinez</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
         [x-cloak] { display: none !important; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 font-sans text-slate-800">
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
 
     <main x-data="{ 
             logs: [],
@@ -25,62 +23,50 @@
                 if (!this.inputValue.trim()) return;
                 this.isLoading = true;
                 
-                // TU LINK DE NGROK YA CONFIGURADO
+                // DIRECCIÓN SEGÚN TU ÚLTIMA CAPTURA DE NGROK
                 const url = 'https://unmonumental-touchily-meghann.ngrok-free.dev/guardar.php';
-
-                const texto = this.inputValue;
-                const timeStr = new Date().toLocaleTimeString();
 
                 try {
                     const response = await fetch(url, {
                         method: 'POST',
-                        mode: 'cors',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ mensaje: texto })
+                        body: JSON.stringify({ mensaje: this.inputValue })
                     });
 
                     if (response.ok) {
-                        this.logs.unshift({ id: Date.now(), text: texto, type: 'success', time: timeStr });
+                        this.logs.unshift({ id: Date.now(), text: this.inputValue, time: new Date().toLocaleTimeString() });
                         this.inputValue = '';
                     } else { throw new Error(); }
                 } catch (e) {
-                    alert('Error: No se pudo conectar con el servidor Ubuntu. Revisa que Ngrok siga abierto.');
-                    this.logs.unshift({ id: Date.now(), text: 'ERROR: ' + texto, type: 'info', time: timeStr });
+                    alert('Error: No se pudo conectar con el servidor Ubuntu');
                 } finally {
                     this.isLoading = false;
-                    setTimeout(() => lucide.createIcons(), 50);
                 }
             }
-        }" class="w-full max-w-md bg-white border border-slate-200 rounded-[2rem] shadow-xl overflow-hidden">
+        }" class="w-full max-w-md bg-white border rounded-[2rem] shadow-xl overflow-hidden">
         
-        <header class="bg-slate-900 p-8 text-white">
+        <header class="bg-slate-900 p-8 text-white text-center">
             <h1 class="text-3xl font-black italic">Cloud-Nexus</h1>
-            <p class="text-xs text-slate-400">Infraestructura IaaS Activa</p>
+            <p class="text-xs text-slate-400">Infraestructura IaaS - Jose Martinez</p>
         </header>
 
         <section class="p-8 pb-4">
             <input type="text" x-model="inputValue" @keydown.enter="addLog" placeholder="Escribir registro..." 
-                   class="w-full p-4 bg-slate-50 border rounded-2xl mb-4 outline-none focus:border-blue-500 font-medium transition-all">
+                   class="w-full p-4 bg-slate-50 border rounded-2xl mb-4 outline-none focus:border-blue-500">
             
             <button @click="addLog" :disabled="isLoading || !inputValue.trim()" 
                     class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 disabled:bg-slate-300 transition-all flex justify-center items-center gap-2">
                 <span x-show="!isLoading">Registrar Evento</span>
-                <span x-show="isLoading" class="flex items-center gap-2">
-                    <i data-lucide="loader-2" class="animate-spin w-5 h-5"></i> Sincronizando...
-                </span>
+                <span x-show="isLoading">Sincronizando...</span>
             </button>
         </section>
 
         <section class="px-8 pb-8 pt-4">
-            <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 italic">Historial del Servidor</h2>
-            <div class="space-y-3 max-h-[250px] overflow-y-auto custom-scrollbar">
+            <div class="space-y-3 max-h-[200px] overflow-y-auto">
                 <template x-for="log in logs" :key="log.id">
-                    <div class="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 animate__animated animate__fadeInDown">
-                        <div class="mt-1.5 h-2 w-2 rounded-full bg-blue-500"></div>
-                        <div class="flex-1">
-                            <span class="text-[10px] text-slate-400 font-mono" x-text="log.time"></span>
-                            <p class="text-sm font-semibold text-slate-700" x-text="log.text"></p>
-                        </div>
+                    <div class="p-3 bg-slate-50 border-l-4 border-blue-500 rounded-r-lg">
+                        <span class="text-[10px] text-slate-400" x-text="log.time"></span>
+                        <p class="text-sm font-semibold" x-text="log.text"></p>
                     </div>
                 </template>
             </div>
