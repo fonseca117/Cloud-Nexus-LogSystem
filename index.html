@@ -25,7 +25,7 @@
                 if (!this.inputValue.trim()) return;
                 this.isLoading = true;
                 
-                // --- TU URL DE NGROK ACTUALIZADA ---
+                // ESTA ES TU URL ACTUAL SEGÚN TU CAPTURA DE PANTALLA
                 const url = 'https://unmonumental-touchily-meghann.ngrok-free.dev/guardar.php';
 
                 const texto = this.inputValue;
@@ -34,6 +34,7 @@
                 try {
                     const response = await fetch(url, {
                         method: 'POST',
+                        mode: 'cors',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ mensaje: texto })
                     });
@@ -58,7 +59,7 @@
         </header>
 
         <section class="p-8 pb-4">
-            <input type="text" x-model="inputValue" @keydown.enter="addLog" placeholder="Ej: Iniciar respaldo..." 
+            <input type="text" x-model="inputValue" @keydown.enter="addLog" placeholder="Ej: Registro de sistema..." 
                    class="w-full p-4 bg-slate-50 border rounded-2xl mb-4 outline-none focus:border-blue-500 font-medium">
             
             <button @click="addLog" :disabled="isLoading || !inputValue.trim()" 
@@ -71,7 +72,7 @@
         </section>
 
         <section class="px-8 pb-8 pt-4">
-            <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Terminal de Salida</h2>
+            <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Terminal de Salida (logs.txt)</h2>
             <div class="space-y-3 max-h-[250px] overflow-y-auto custom-scrollbar">
                 <template x-for="log in logs" :key="log.id">
                     <div class="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
