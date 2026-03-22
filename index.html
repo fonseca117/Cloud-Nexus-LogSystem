@@ -43,10 +43,7 @@
 
     <main 
         x-data="{ 
-            logs: [
-                { id: 1, text: 'Sistema inicializado correctamente', type: 'success', time: '10:45:02' },
-                { id: 2, text: 'Conexión con DB establecida', type: 'info', time: '10:45:05' }
-            ],
+            logs: [],
             inputValue: '',
             isLoading: false,
             
@@ -61,7 +58,7 @@
                                 now.getSeconds().toString().padStart(2, '0');
 
                 try {
-                    // LLAMADA REAL AL SERVIDOR UBUNTU (IaaS)
+                    // LLAMADA AL SERVIDOR UBUNTU (IP LOCAL)
                     const response = await fetch('http://192.168.0.108/guardar.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -69,7 +66,6 @@
                     });
 
                     if (response.ok) {
-                        // Si se guardó en el servidor, lo agregamos a la lista visual
                         this.logs.unshift({
                             id: Date.now(),
                             text: textoEvento,
@@ -78,22 +74,20 @@
                         });
                         this.inputValue = '';
                     } else {
-                        throw new Error('Error en la respuesta del servidor');
+                        throw new Error('Error en el servidor');
                     }
                 } catch (error) {
-                    console.error('Error de conexión:', error);
-                    alert('Error: No se pudo conectar con el servidor local en la IP 192.168.0.108. Asegúrate de que el servidor esté encendido.');
+                    console.error('Error:', error);
+                    alert('Error de conexión con 192.168.0.108. Verifica que el servidor Ubuntu esté activo y en la misma red.');
                     
-                    // Lo agregamos como advertencia si falla
                     this.logs.unshift({
                         id: Date.now(),
-                        text: 'ERROR DE SINCRONIZACIÓN: ' + textoEvento,
+                        text: 'FALLO DE CONEXIÓN: ' + textoEvento,
                         type: 'info',
                         time: timeStr
                     });
                 } finally {
                     this.isLoading = false;
-                    // Forzar actualización de iconos Lucide para los nuevos elementos
                     setTimeout(() => lucide.createIcons(), 50);
                 }
             }
@@ -166,10 +160,7 @@
                     <span class="flex h-2 w-2 rounded-full bg-blue-500"></span>
                     Terminal de Salida (logs.txt)
                 </h2>
-                <button 
-                    @click="logs = []"
-                    class="text-slate-300 hover:text-red-500 transition-colors p-1"
-                >
+                <button @click="logs = []" class="text-slate-300 hover:text-red-500 transition-colors p-1">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
             </div>
@@ -183,13 +174,9 @@
 
                 <template x-for="log in logs" :key="log.id">
                     <div class="animate__animated animate__fadeInLeft animate__faster group">
-                        <div class="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-blue-200 hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 transition-all cursor-default">
+                        <div class="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-blue-200 hover:bg-white hover:shadow-lg transition-all">
                             <div class="mt-1.5 shrink-0">
-                                <div :class="{
-                                    'bg-emerald-500 ring-4 ring-emerald-500/10': log.type === 'success',
-                                    'bg-blue-500 ring-4 ring-blue-500/10': log.type === 'info',
-                                    'bg-indigo-400 ring-4 ring-indigo-400/10': log.type === 'user'
-                                }" class="h-2 w-2 rounded-full"></div>
+                                <div :class="log.type === 'success' ? 'bg-emerald-500 ring-4 ring-emerald-500/10' : 'bg-blue-500 ring-4 ring-blue-500/10'" class="h-2 w-2 rounded-full"></div>
                             </div>
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center justify-between mb-1">
@@ -214,15 +201,7 @@
     </main>
 
     <script>
-        // Inicializar iconos
         lucide.createIcons();
-        
-        // Reinicializar iconos cuando Alpine actualice el DOM
-        document.addEventListener('alpine:initialized', () => {
-            Alpine.effect(() => {
-                setTimeout(() => lucide.createIcons(), 10);
-            });
-        });
     </script>
 </body>
 </html>
